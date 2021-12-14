@@ -18,6 +18,7 @@ class App extends Component {
     }
   }  
   
+
   componentDidMount(){
     if(this.state.userLoggedIn){
       this.getTrips()

@@ -21,7 +21,7 @@ export default class UserLogin extends Component {
         }
     }
     getTrips = () => {
-        fetch(baseURL + "trips/", { credentials: "include" })
+        try{fetch(baseURL + "trips/", { credentials: "include" })
             .then(res => {
                 return res.json()
             }).then(data => {
@@ -29,7 +29,11 @@ export default class UserLogin extends Component {
                     trips: data.data
                 })
                 console.log("trips: " + this.state.trips)
-            })
+            })}
+        catch(err){
+            this.clearUser()
+            console.log('Error => '+ err)
+        }
     }
 
     addTrips = (newTrip) => {

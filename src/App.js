@@ -1,31 +1,61 @@
 import './App.css';
-import React,{Component} from 'react';
+import React,{Component, useState} from 'react';
 import { Button,Menu } from 'semantic-ui-react'
-import NewTrip from "./js/NewTrip"
-import ShowTrip from "./js/ShowTrip"
-import UserLogin from "./js/UserLogin"
 import {Outlet, Link} from 'react-router-dom'
+import UserLogin from './js/UserLogin';
 
-let baseURL = process.env.REACT_APP_BASEURL
 
-class App extends Component {
-  constructor(props){
-    super(props)
-    this.state= {
-      showModalOpen: true,
-      editModalOpen: false,
-      userLoggedIn: false,
-    }
-  }  
+function App() {
+  // constructor(props) {
+  //   super(props)
+  //   this.state = {
+  //       userId: "",
+  //       username: "",
+  //       email: "",
+  //       userLoggedIn: false,
+  //       userModalOpen: false,
+  //   }
+  // }
+  const [userId,setUserId] = useState("")
+  const [username,setUsername] = useState("")
+  const [email,setEmail] = useState("")
+  const [userLoggedIn,setUserLoggedIn] = useState(false)
+  const [userModalOpen,setUserModalOpen] = useState(false)
+
   
-
-  componentDidMount(){
-    if(this.state.userLoggedIn){
-      this.getTrips()
-    }
+  //   setUser = (user) => {
+  //     this.setState({
+  //         userLoggedIn: true,
+  //         username: user.username,
+  //         userId: user.id,
+  //         email: user.email
+  //     })
+  // }
+   const setUser = (user) => {
+      setUserLoggedIn(true,)
+      setUsername(user.username)
+      setUserId(user.id)
+      setEmail(user.email)
+      return {userId, username, email,userLoggedIn, userModalOpen}
+  }
+  // clearUser = () => {
+  //     this.setState({
+  //         userLoggedIn: false,
+  //         userFormType: "",
+  //         username: "",
+  //         userId: "",
+  //         email: ""
+  //     })
+  // }
+  const clearUser = () => {
+      setUserLoggedIn(false)
+      setUsername("")
+      setUserId("")
+      setEmail("")
+      setUserModalOpen(false)
+      return {userId, username, email,userLoggedIn, userModalOpen}
   }
 
-  render(){
   return (
     <div className="App">
       <Menu size='small'>
@@ -42,15 +72,15 @@ class App extends Component {
 
         <Menu.Menu position='right'>
           <Menu.Item>
-            <Link 
-              to="lotn"
-            ><Button> Log In or Sign Up</Button></Link>
+            <Button onClick={() => setUserModalOpen(true)}> Log In or Sign Up</Button>
           </Menu.Item>
         </Menu.Menu>
       </Menu>
-      <Outlet/>
+      {userModalOpen &&
+        <UserLogin userId={userId} username={username} email={email} userLoggedIn={userLoggedIn} setUser={setUser} clearUser={clearUser}/>}
     </div>
-  );}
+  );
 }
+
 
 export default App;

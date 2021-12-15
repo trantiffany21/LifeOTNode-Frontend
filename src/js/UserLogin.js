@@ -12,11 +12,6 @@ export default class UserLogin extends Component {
         this.state = {
             trips: [],
             userFormType: "",
-            userId: "",
-            username: "",
-            email: "",
-            password: "",
-            userLoggedIn: false,
             newTripItem: false
         }
     }
@@ -31,7 +26,8 @@ export default class UserLogin extends Component {
                 console.log("trips: " + this.state.trips)
             })}
         catch(err){
-            this.clearUser()
+            this.props.clearUser()
+            this.setUserForm("")
             console.log('Error => '+ err)
         }
     }
@@ -55,24 +51,24 @@ export default class UserLogin extends Component {
         })
     }
 
-    setUser = (user) => {
-        this.setState({
-            userLoggedIn: true,
-            username: user.username,
-            userId: user.id,
-            email: user.email
-        })
-        this.getTrips()
-    }
-    clearUser = () => {
-        this.setState({
-            userLoggedIn: false,
-            userFormType: "",
-            username: "",
-            userId: "",
-            email: ""
-        })
-    }
+    // setUser = (user) => {
+    //     this.setState({
+    //         userLoggedIn: true,
+    //         username: user.username,
+    //         userId: user.id,
+    //         email: user.email
+    //     })
+    //     this.getTrips()
+    // }
+    // clearUser = () => {
+    //     this.setState({
+    //         userLoggedIn: false,
+    //         userFormType: "",
+    //         username: "",
+    //         userId: "",
+    //         email: ""
+    //     })
+    // }
 
     handleChange = (event) => {
         this.setState({
@@ -100,12 +96,13 @@ export default class UserLogin extends Component {
             return res.json()
         }).then(data => {
             if (data.status === 201) {
-                this.setUser(data.data)
+                this.props.setUser(data.data)
                 this.setUserForm("")
+                this.getTrips()
             }
         }).catch(error => console.error({ 'Error': error }))
     }
-
+    
     handleLogin = (event) => {
         console.log(this.state.username)
         console.log(this.state.email)
@@ -124,8 +121,9 @@ export default class UserLogin extends Component {
             return res.json()
         }).then(data => {
             if (data.status === 200) {
-                this.setUser(data.data)
+                this.props.setUser(data.data)
                 this.setUserForm("")
+                this.getTrips()
             }
         }).catch(error => console.error({ 'Error': error }))
     }
@@ -134,13 +132,15 @@ export default class UserLogin extends Component {
     }
 
     render() {
-        if (this.state.userLoggedIn) {
+        console.log("user logged in: " + this.props.userLoggedIn)
+        console.log(this.props.userId)
+        if (this.props.userLoggedIn) {
             return(
             <>
                 <ShowTrip trips={this.state.trips} baseURL={baseURL} setTrips={this.setTrips}/>
                 <Button onClick={()=> this.setNewTripItem()}>+ New Trip</Button>
                 {this.state.newTripItem &&
-                    <NewTrip userId={this.state.userId} baseURL={baseURL} addTrips={this.addTrips} />
+                    <NewTrip userId={this.props.userId} baseURL={baseURL} addTrips={this.addTrips} />
                 }
             </>)
         } else {
@@ -204,11 +204,7 @@ export default class UserLogin extends Component {
                             <Button primary compact type="submit">Login</Button>
                         </Form>
                     }
-                    {this.state.userLoggedIn &&
-                        <>
-                            <Button className="" onClick={() => this.clearUser()}>Logout</Button>
-                        </>
-                    }
+                    
 
 
 

@@ -80,6 +80,7 @@ export default class UserLogin extends Component {
         console.log(this.state.username)
         console.log(this.state.email)
         console.log(this.state.password)
+        console.log(baseURL)
         event.preventDefault()
         const regUrl = baseURL + 'auth/' + 'register'
         fetch(regUrl, {

@@ -1,13 +1,13 @@
 import React, { Component } from "react";
-import { Table, Form, Input, Button, Popup } from 'semantic-ui-react'
+import { Table, Button, Popup } from 'semantic-ui-react'
 import POIForm from "./POIForm";
+import EditTrip from "./EditTrip";
 
 export default class ShowTrip extends Component {
     constructor(props) {
         super(props)
         this.state = {
             editModalOpen: false,
-            poiModalOpen: false,
             name: "",
             origin: "",
             destination: "",
@@ -16,38 +16,58 @@ export default class ShowTrip extends Component {
             tripToEdit: {}
         }
     }
-    showEditForm = (trip) => {
+    setEditModalOpen = () => {
         if (this.state.editModalOpen) {
             this.setState({ editModalOpen: false })
         } else {
             this.setState({
-                editModalOpen: true,
-                name: trip.name,
-                origin: trip.origin,
-                destination: trip.destination,
-                lodgingName: trip.lodging.lodging_name,
-                lodgingAddress: trip.lodging.lodging_address,
-                tripToEdit: trip
+                editModalOpen: true
             })
         }
     }
+    showEditForm = (trip) => {
+        this.setState({
+            editModalOpen: true,
+            name: trip.name,
+            origin: trip.origin,
+            destination: trip.destination,
+            lodgingName: trip.lodging.lodging_name,
+            lodgingAddress: trip.lodging.lodging_address,
+            tripToEdit: trip
+        })
+    }
 
     showPOIForm = (trip) => {
-        if (this.state.poiModalOpen) {
-            this.setState({ poiModalOpen: false })
-        } else {
-            this.props.setShowModal()
-            this.setState({
-                poiModalOpen: true,
-                tripToEdit: trip
-            })
-        }
+        this.props.setTripModalOpen(false)
+        this.props.setPoiModalOpen(true)
+        this.setState({
+            tripToEdit: trip
+        })
     }
 
     handleChange = (event) => {
         this.setState({
             [event.target.name]: event.target.value
         })
+    }
+    setInput = (type, name) => {
+        if (type === "origin") {
+            this.setState({
+                origin: name
+            })
+        } else if (type === "destination") {
+            this.setState({
+                destination: name
+            })
+        } else {
+            this.setState({
+                lodgingName: name.name,
+                lodgingAddress: name.address,
+                lodgingLat: name.lat,
+                lodgingLong: name.long
+            })
+
+        }
     }
 
     handleSubmit = async (e) => {
@@ -57,12 +77,14 @@ export default class ShowTrip extends Component {
             const response = await fetch(editUrl, {
                 method: 'PUT',
                 body: JSON.stringify({
-                    name: e.target.name.value,
-                    origin: e.target.origin.value,
-                    destination: e.target.destination.value,
+                    name: this.state.name,
+                    origin: this.state.origin,
+                    destination: this.state.destination,
                     lodging: {
-                        lodging_name: e.target.lodgingName.value,
-                        lodging_address: e.target.lodgingAddress.value,
+                        lodging_name: this.state.lodgingName,
+                        lodging_address: this.state.lodgingAddress,
+                        lodging_lat: this.state.lodgingLat,
+                        lodging_long: this.state.lodgingLong,
                     }
                 }),
                 headers: {
@@ -102,7 +124,7 @@ export default class ShowTrip extends Component {
     render() {
         return (
             <div className="TripContainer">
-                {this.props.showModalOpen &&
+                {this.props.tripModalOpen &&
                     <Table >
                         <Table.Header>
                             <Table.Row>
@@ -111,6 +133,7 @@ export default class ShowTrip extends Component {
                                 <Table.HeaderCell>Destination</Table.HeaderCell>
                                 <Table.HeaderCell>Lodging Name</Table.HeaderCell>
                                 <Table.HeaderCell>Lodging Address</Table.HeaderCell>
+                                <Table.HeaderCell></Table.HeaderCell>
                             </Table.Row>
                         </Table.Header>
                         <tbody>
@@ -125,7 +148,8 @@ export default class ShowTrip extends Component {
                                         <Table.Cell>
                                             <Button.Group basic size='small'>
                                                 <Popup size="tiny" content='Points of Interest' trigger={<Button icon='map outline' onClick={() => this.showPOIForm(trip)} />} />
-                                                <Popup size="tiny" content='Edit Trip' trigger={<Button icon='edit' onClick={() => this.showEditForm(trip)} />} />
+                                                <EditTrip showEditForm={this.showEditForm} trip={trip} handleChange={this.handleChange} handleSubmit={this.handleSubmit} name={this.state.name} origin={this.state.origin} destination={this.state.destination} lodgingName={this.state.lodgingName} setInput={this.setInput}/>
+
                                                 <Popup size="tiny" content='Delete Trip' trigger={<Button icon='trash alternate' onClick={() => this.deleteTrip(trip.id)} />} />
                                             </Button.Group>
                                         </Table.Cell>
@@ -136,47 +160,8 @@ export default class ShowTrip extends Component {
                         </tbody>
                     </Table>
                 }
-                {this.state.editModalOpen &&
-                    <Form onSubmit={this.handleSubmit}>
-                        <Form.Group>
-                            <Form.Field
-                                onChange={(e) => this.handleChange(e)}
-                                id='name'
-                                name='name'
-                                control={Input}
-                                label='Name'
-                                value={this.state.name}
-                            />
-                            <Form.Field
-                                onChange={(e) => this.handleChange(e)}
-                                id='origin'
-                                name='origin'
-                                control={Input}
-                                label='Origin'
-                                value={this.state.origin}
-                            />
-                            <Form.Field
-                                onChange={(e) => this.handleChange(e)}
-                                id='destination'
-                                name='destination'
-                                control={Input}
-                                label='Destination'
-                                value={this.state.destination}
-                            />
-                        </Form.Group>
-                        <Form.Field
-                            onChange={(e) => this.handleChange(e)}
-                            id='lodgingName'
-                            name='lodgingName'
-                            control={Input}
-                            label='Lodging Name'
-                            value={this.state.lodgingName}
-                        />
-                        <Button primary compact type="submit"> Edit Trip </Button>
-                    </Form>
-                }
 
-                {this.state.poiModalOpen && <POIForm baseURL={this.props.baseURL} trip={this.state.tripToEdit} />}
+                {this.props.poiModalOpen && <POIForm baseURL={this.props.baseURL} trip={this.state.tripToEdit} />}
             </div>
         );
     }

@@ -1,11 +1,10 @@
 import React, { Component } from "react";
-import { Form, Input, Button, Modal,List } from "semantic-ui-react";
+import { Form, Input, Button } from "semantic-ui-react";
 
 export default class NewTrip extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            editModalOpen: false,
             name: "",
             origin: "",
             destination: "",

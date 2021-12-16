@@ -1,82 +1,68 @@
 import './App.css';
-import React,{useState} from 'react';
-import { Button,Menu } from 'semantic-ui-react'
+import React, { useState } from 'react';
+import { Button, Menu, Dropdown } from 'semantic-ui-react'
 import UserLogin from './js/UserLogin';
 
 
 function App() {
-  // constructor(props) {
-  //   super(props)
-  //   this.state = {
-  //       userId: "",
-  //       username: "",
-  //       email: "",
-  //       userLoggedIn: false,
-  //       userModalOpen: false,
-  //   }
-  // }
-  const [userId,setUserId] = useState("")
-  const [username,setUsername] = useState("")
-  const [email,setEmail] = useState("")
-  const [userLoggedIn,setUserLoggedIn] = useState(false)
-  const [userModalOpen,setUserModalOpen] = useState(false)
+  const [userId, setUserId] = useState("")
+  const [username, setUsername] = useState("")
+  const [email, setEmail] = useState("")
+  const [userLoggedIn, setUserLoggedIn] = useState(false)
+  const [userModalOpen, setUserModalOpen] = useState(false)
+  const [tripModalOpen, setTripModalOpen] = useState(false)
+  const [poiModalOpen, setPoiModalOpen] = useState(false)
+  let helloMsg = "Hi, " + username
 
-  
-  //   setUser = (user) => {
-  //     this.setState({
-  //         userLoggedIn: true,
-  //         username: user.username,
-  //         userId: user.id,
-  //         email: user.email
-  //     })
-  // }
-   const setUser = (user) => {
-      setUserLoggedIn(true,)
-      setUsername(user.username)
-      setUserId(user.id)
-      setEmail(user.email)
-      return {userId, username, email,userLoggedIn, userModalOpen}
+  const setUser = (user) => {
+    setUserLoggedIn(true)
+    setUsername(user.username)
+    setUserId(user.id)
+    setEmail(user.email)
+    return { userId, username, email, userLoggedIn, userModalOpen }
   }
-  // clearUser = () => {
-  //     this.setState({
-  //         userLoggedIn: false,
-  //         userFormType: "",
-  //         username: "",
-  //         userId: "",
-  //         email: ""
-  //     })
-  // }
+
   const clearUser = () => {
-      setUserLoggedIn(false)
-      setUsername("")
-      setUserId("")
-      setEmail("")
-      setUserModalOpen(false)
-      return {userId, username, email,userLoggedIn, userModalOpen}
+    setUsername("")
+    setUserId("")
+    setEmail("")
+    setUserLoggedIn(false)
+    setUserModalOpen(false)
+    setTripModalOpen(false)
+    setPoiModalOpen(false)
+    return { userId, username, email, userLoggedIn, userModalOpen }
   }
 
   return (
     <div className="App">
       <Menu size='small'>
         <Menu.Item
-          name='home'
-        />
-        <Menu.Item
-          name='messages'
-        />
-        <Menu.Item size='medium'
           name='Life on the Node'
-          />
+        />
 
 
         <Menu.Menu position='right'>
-          <Menu.Item>
-            <Button onClick={() => setUserModalOpen(true)}> Log In or Sign Up</Button>
-          </Menu.Item>
+            {!userLoggedIn &&
+            <Menu.Item>
+              <Button onClick={() => setUserModalOpen(true)}> Log In or Sign Up</Button>
+              </Menu.Item>
+            }
+            {userLoggedIn &&
+            <Menu.Item>
+              <Dropdown item inline text={helloMsg} >
+              <Dropdown.Menu simple item>
+                <Dropdown.Item>My Account</Dropdown.Item>
+                <Dropdown.Item onClick={() =>{setTripModalOpen(true); setPoiModalOpen(false)}}>My Trips</Dropdown.Item>
+                <Dropdown.Item onClick={() => {setUserModalOpen(false); clearUser()}}>Log Out</Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+            </Menu.Item>
+            }
+          
         </Menu.Menu>
       </Menu>
       {userModalOpen &&
-        <UserLogin userId={userId} username={username} email={email} userLoggedIn={userLoggedIn} setUser={setUser} clearUser={clearUser}/>}
+        <UserLogin userId={userId} username={username} email={email} userLoggedIn={userLoggedIn} setUser={setUser} clearUser={clearUser} tripModalOpen={tripModalOpen} setTripModalOpen={setTripModalOpen} poiModalOpen={poiModalOpen} setPoiModalOpen={setPoiModalOpen}/>}
     </div>
   );
 }

@@ -9,15 +9,14 @@ export default class UserLogin extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            showModalOpen: true,
             trips: [],
             userFormType: "login",
             
         }
     }
-    setShowModal = () =>[
-        this.setState({showModalOpen: !this.state.showModalOpen})
-    ]
+    // setShowModal = () =>[
+    //     this.setState({showModalOpen: !this.state.showModalOpen})
+    // ]
 
     getTrips = () => {
         try{fetch(baseURL + "trips/", { credentials: "include" })
@@ -28,6 +27,7 @@ export default class UserLogin extends Component {
                     trips: data.data
                 })
                 console.log("trips: " + this.state.trips)
+                this.props.setTripModalOpen(true)
             })}
         catch(err){
             this.props.clearUser()
@@ -130,7 +130,7 @@ export default class UserLogin extends Component {
         if (this.props.userLoggedIn) {
             return(
                 <Grid container style={{ padding: '2em 0em' }}>
-                {this.state.showModalOpen &&
+                {this.props.tripModalOpen &&
                     <Modal
                     closeIcon
                     trigger={<Button positive>+ New Trip</Button>}
@@ -143,7 +143,7 @@ export default class UserLogin extends Component {
                 </Modal>
                 }
                     <Grid.Row>
-                        <ShowTrip trips={this.state.trips} baseURL={baseURL} setTrips={this.setTrips} showModalOpen={this.state.showModalOpen} setShowModal={this.setShowModal}/>
+                        <ShowTrip trips={this.state.trips} baseURL={baseURL} setTrips={this.setTrips} tripModalOpen={this.props.tripModalOpen} setTripModalOpen={this.props.setTripModalOpen} poiModalOpen={this.props.poiModalOpen} setPoiModalOpen={this.props.setPoiModalOpen}/>
                     </Grid.Row>
                 </Grid>
             )

@@ -1,12 +1,11 @@
 import React, { Component } from "react";
-import { Table, Form, Input, Button } from 'semantic-ui-react'
+import { Table, Form, Input, Button, Popup } from 'semantic-ui-react'
 import POIForm from "./POIForm";
 
 export default class ShowTrip extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            showModalOpen: true,
             editModalOpen: false,
             poiModalOpen: false,
             name: "",
@@ -37,8 +36,8 @@ export default class ShowTrip extends Component {
         if (this.state.poiModalOpen) {
             this.setState({ poiModalOpen: false })
         } else {
+            this.props.setShowModal()
             this.setState({
-                showModalOpen: false,
                 poiModalOpen: true,
                 tripToEdit: trip
             })
@@ -103,7 +102,7 @@ export default class ShowTrip extends Component {
     render() {
         return (
             <div className="TripContainer">
-                {this.state.showModalOpen &&
+                {this.props.showModalOpen &&
                     <Table >
                         <Table.Header>
                             <Table.Row>
@@ -111,7 +110,7 @@ export default class ShowTrip extends Component {
                                 <Table.HeaderCell>Origin</Table.HeaderCell>
                                 <Table.HeaderCell>Destination</Table.HeaderCell>
                                 <Table.HeaderCell>Lodging Name</Table.HeaderCell>
-                                <Table.HeaderCell>Lodging Destination</Table.HeaderCell>
+                                <Table.HeaderCell>Lodging Address</Table.HeaderCell>
                             </Table.Row>
                         </Table.Header>
                         <tbody>
@@ -123,9 +122,13 @@ export default class ShowTrip extends Component {
                                         <Table.Cell>{trip.destination}</Table.Cell>
                                         <Table.Cell>{trip.lodging.lodging_name}</Table.Cell>
                                         <Table.Cell>{trip.lodging.lodging_address}</Table.Cell>
-                                        <Table.Cell> <Button positive compact onClick={() => this.showPOIForm(trip)}>Route</Button></Table.Cell>
-                                        <Table.Cell> <Button positive compact onClick={() => this.showEditForm(trip)}>Edit</Button></Table.Cell>
-                                        <Table.Cell> <Button negative compact onClick={() => this.deleteTrip(trip.id)}>Delete</Button></Table.Cell>
+                                        <Table.Cell>
+                                            <Button.Group basic size='small'>
+                                                <Popup size="tiny" content='Points of Interest' trigger={<Button icon='map outline' onClick={() => this.showPOIForm(trip)} />} />
+                                                <Popup size="tiny" content='Edit Trip' trigger={<Button icon='edit' onClick={() => this.showEditForm(trip)} />} />
+                                                <Popup size="tiny" content='Delete Trip' trigger={<Button icon='trash alternate' onClick={() => this.deleteTrip(trip.id)} />} />
+                                            </Button.Group>
+                                        </Table.Cell>
                                     </Table.Row>
                                 )
                             })
@@ -168,14 +171,6 @@ export default class ShowTrip extends Component {
                             control={Input}
                             label='Lodging Name'
                             value={this.state.lodgingName}
-                        />
-                        <Form.Field
-                            onChange={(e) => this.handleChange(e)}
-                            id='lodgingAddress'
-                            name='lodgingAddress'
-                            control={Input}
-                            label='Lodging Address'
-                            value={this.state.lodgingAddress}
                         />
                         <Button primary compact type="submit"> Edit Trip </Button>
                     </Form>

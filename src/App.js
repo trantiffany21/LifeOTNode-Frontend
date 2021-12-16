@@ -1,7 +1,6 @@
 import './App.css';
-import React,{Component, useState} from 'react';
+import React,{useState} from 'react';
 import { Button,Menu } from 'semantic-ui-react'
-import {Outlet, Link} from 'react-router-dom'
 import UserLogin from './js/UserLogin';
 
 

@@ -36,3 +36,9 @@
     transform: rotate(360deg);
   }
 }
+.overlapped{
+  margin:-15px 0 0 0;
+  width:100%;
+  position:absolute;
+  z-index:1;
+}

@@ -1,6 +1,5 @@
 import React, { Component } from "react";
-import { useNavigate, Navigate } from 'react-router-dom'
-import { Form, Input, Button } from 'semantic-ui-react'
+import { Form, Input, Button, Grid , Divider,Segment,Modal} from 'semantic-ui-react'
 import NewTrip from './NewTrip'
 import ShowTrip from './ShowTrip'
 
@@ -10,11 +9,16 @@ export default class UserLogin extends Component {
     constructor(props) {
         super(props)
         this.state = {
+            showModalOpen: true,
             trips: [],
-            userFormType: "",
-            newTripItem: false
+            userFormType: "login",
+            
         }
     }
+    setShowModal = () =>[
+        this.setState({showModalOpen: !this.state.showModalOpen})
+    ]
+
     getTrips = () => {
         try{fetch(baseURL + "trips/", { credentials: "include" })
             .then(res => {
@@ -77,10 +81,6 @@ export default class UserLogin extends Component {
     }
 
     handleSubmit = (event) => {
-        console.log(this.state.username)
-        console.log(this.state.email)
-        console.log(this.state.password)
-        console.log(baseURL)
         event.preventDefault()
         const regUrl = baseURL + 'auth/' + 'register'
         fetch(regUrl, {
@@ -104,9 +104,6 @@ export default class UserLogin extends Component {
     }
     
     handleLogin = (event) => {
-        console.log(this.state.username)
-        console.log(this.state.email)
-        console.log(this.state.password)
         event.preventDefault()
         fetch(baseURL + 'auth' + '/login', {
             method: 'POST',
@@ -127,88 +124,97 @@ export default class UserLogin extends Component {
             }
         }).catch(error => console.error({ 'Error': error }))
     }
-    setNewTripItem = () => {
-        this.setState({newTripItem: !this.state.newTripItem})
-    }
+    
 
     render() {
-        console.log("user logged in: " + this.props.userLoggedIn)
-        console.log(this.props.userId)
         if (this.props.userLoggedIn) {
             return(
-            <>
-                <ShowTrip trips={this.state.trips} baseURL={baseURL} setTrips={this.setTrips}/>
-                <Button onClick={()=> this.setNewTripItem()}>+ New Trip</Button>
-                {this.state.newTripItem &&
-                    <NewTrip userId={this.props.userId} baseURL={baseURL} addTrips={this.addTrips} />
+                <Grid container style={{ padding: '2em 0em' }}>
+                {this.state.showModalOpen &&
+                    <Modal
+                    closeIcon
+                    trigger={<Button positive>+ New Trip</Button>}
+                    actions={{ key: 'done', content: 'Done', positive: true }}
+                >
+                    <Modal.Header>New Trip Details</Modal.Header>
+                    <Modal.Content>
+                            <NewTrip userId={this.props.userId} baseURL={baseURL} addTrips={this.addTrips} />
+                            </Modal.Content>
+                </Modal>
                 }
-            </>)
+                    <Grid.Row>
+                        <ShowTrip trips={this.state.trips} baseURL={baseURL} setTrips={this.setTrips} showModalOpen={this.state.showModalOpen} setShowModal={this.setShowModal}/>
+                    </Grid.Row>
+                </Grid>
+            )
         } else {
             return (
-                <div className="UserContainer">
-                    <Button primary compact className="" onClick={() => this.setUserForm("register")}>Register</Button>
-                    <Button secondary compact className="" onClick={() => this.setUserForm("login")}>Login</Button>
-                    {
-                        this.state.userFormType === "register" &&
-                        <Form className="" onSubmit={this.handleSubmit}>
-                            <Form.Group widths='equal'>
+                <Segment placeholder>
+                        <Grid columns={2} relaxed='very' stackable textAlign='center' verticalAlign='middle'>
+                        <Grid.Column style={{ maxWidth: 450 }}>
+                        <Form onSubmit={this.handleSubmit}>
                                 <Form.Field
                                     onChange={(e) => this.handleChange(e)}
-                                    id='form-input-control-username'
+                                    id='form-input-register-username'
+                                    icon='user'
+                                    iconPosition='left'
                                     control={Input}
                                     name="username"
-                                    label='Username'
                                     placeholder='Enter Username'
                                 />
                                 <Form.Field
                                     onChange={(e) => this.handleChange(e)}
-                                    id='form-input-control-email'
+                                    id='form-input-register-email'
                                     control={Input}
+                                    icon='address card'
+                                    iconPosition='left'
                                     name="email"
-                                    label='Email'
                                     placeholder='Enter Email'
                                 />
                                 <Form.Field
                                     onChange={(e) => this.handleChange(e)}
-                                    id='form-input-control-password'
+                                    id='form-input-register-password'
+                                    icon='lock'
+                                    iconPosition='left'
                                     control={Input}
+                                    type="password"
                                     name="password"
-                                    label='Password'
                                     placeholder='Enter Password'
                                 />
-                            </Form.Group>
                             <Button primary compact type="submit">Register</Button>
                         </Form>
-                    }
-                    {
-                        this.state.userFormType === "login" &&
+                        </Grid.Column>
+                        <Grid.Column style={{ maxWidth: 450 }}>
                         <Form className="" onSubmit={this.handleLogin}>
-                            <Form.Group widths='equal'>
                                 <Form.Field
                                     onChange={(e) => this.handleChange(e)}
-                                    id='form-input-control-email'
+                                    id='form-input-control-username'
+                                    icon='user'
+                                    iconPosition='left'
                                     control={Input}
-                                    name="email"
-                                    label='Email'
-                                    placeholder='Enter Email'
+                                    name="username"
+                                    placeholder='Enter Username'
                                 />
                                 <Form.Field
                                     onChange={(e) => this.handleChange(e)}
                                     id='form-input-control-password'
+                                    icon='lock'
+                                    iconPosition='left'
                                     control={Input}
+                                    type="password"
                                     name="password"
-                                    label='Password'
                                     placeholder='Enter Password'
                                 />
-                            </Form.Group>
                             <Button primary compact type="submit">Login</Button>
                         </Form>
-                    }
+                    </Grid.Column>
+                </Grid>
+                <Divider vertical>Or</Divider>
                     
 
 
 
-                </div>
+                </Segment>
             );
         }
     }

@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { Table, Form, Input, Button } from 'semantic-ui-react'
-import {Routes, Route, useParams} from 'react-router-dom'
 
 export default class POIForm extends Component {
     constructor(props) {

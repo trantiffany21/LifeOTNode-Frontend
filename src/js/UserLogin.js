@@ -132,9 +132,8 @@ export default class UserLogin extends Component {
                 <Grid container style={{ padding: '2em 0em' }}>
                     
                     <NewTrip userId={this.props.userId} baseURL={baseURL} addTrips={this.addTrips} tripModalOpen={this.props.tripModalOpen} setTripModalOpen={this.props.setTripModalOpen} />
-                    <Grid.Row>
+                    
                         <ShowTrip userId={this.props.userId} addTrips={this.addTrips} trips={this.state.trips} baseURL={baseURL} setTrips={this.setTrips} tripModalOpen={this.props.tripModalOpen} setTripModalOpen={this.props.setTripModalOpen} poiModalOpen={this.props.poiModalOpen} setPoiModalOpen={this.props.setPoiModalOpen}/>
-                    </Grid.Row>
                 </Grid>
             )
         } else {

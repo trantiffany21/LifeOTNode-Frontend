@@ -1,11 +1,12 @@
 import React, { Component } from "react";
-import { Table, Form, Input, Button, Popup, Modal, Grid, Icon } from 'semantic-ui-react'
+import { Table, Form, Input, Button, Popup, Modal, Grid, Icon, Header } from 'semantic-ui-react'
 
 export default class POIForm extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            editModalOpen: false,
+            editPOIModalOpen: false,
+            newPOIModalOpen: false,
             name: "",
             address: "",
             pois: [],
@@ -14,7 +15,7 @@ export default class POIForm extends Component {
             long: "",
             apiKey: process.env.REACT_APP_MAPBOX_API_KEY,
             suggestionList: [],
-            poiSuggestionModal:false
+            poiSuggestionModal: false
         }
     }
 
@@ -29,20 +30,37 @@ export default class POIForm extends Component {
                 console.log(this.state.pois[0])
             })
     }
+    addPOI = (newPOI) => {
+        console.log("newPOI: " + newPOI)
+        const copyPOIs = [...this.state.pois]
+        copyPOIs.push(newPOI)
+        this.setState({
+            pois: copyPOIs
+        })
+    }
     handleChange = (event) => {
         this.setState({
             [event.target.name]: event.target.value
         })
     }
     showEditForm = (poi) => {
-        if (this.state.editModalOpen) {
-            this.setState({ editModalOpen: false })
+        if (this.state.editPOIModalOpen) {
+            this.setState({ editPOIModalOpen: false })
         } else {
             this.setState({
-                editModalOpen: true,
+                editPOIModalOpen: true,
                 name: poi.name,
                 address: poi.address,
                 poiToEdit: poi
+            })
+        }
+    }
+    setNewPOIModal = () => {
+        if (this.state.newPOIModalOpen) {
+            this.setState({ newPOIModalOpen: false })
+        } else {
+            this.setState({
+                newPOIModalOpen: true,
             })
         }
     }
@@ -56,7 +74,7 @@ export default class POIForm extends Component {
         this.setState({
             address: name,
             suggestionList: [],
-            poiSuggestionModal:false
+            poiSuggestionModal: false
         })
     }
 
@@ -84,13 +102,40 @@ export default class POIForm extends Component {
                 copyPOIs[findIndex] = updatedPOI.data
                 this.setPOIs(copyPOIs)
                 this.setState({
-                    editModalOpen: false
+                    editPOIModalOpen: false
                 })
             }
         }
         catch (err) {
             console.log('Error => ', err)
         }
+    }
+
+    handleAddPOI = (event) => {
+        event.preventDefault()
+        fetch(this.props.baseURL + 'trips/pois/', {
+            method: 'POST',
+            body: JSON.stringify({
+                name: this.state.name,
+                address: this.state.address,
+                lat: this.state.lat,
+                long: this.state.long,
+                trip: this.props.trip.id
+            }),
+            headers: { 'Content-Type': 'application/json' },
+            credentials: "include"
+        }).then(res => {
+            return res.json()
+        }).then(data => {
+            this.addPOI(data.data)
+            this.setNewPOIModal()
+            this.setState({
+                name: "",
+                address: "",
+                lat: "",
+                long: "",
+            })
+        }).catch(error => console.error({ 'Error': error }))
     }
 
     deletePOI = (id) => {
@@ -176,6 +221,7 @@ export default class POIForm extends Component {
     render() {
         return (
             <div className="POIContainer">
+                <Header as='h1'>Points of Interest</Header>
                 <Grid container style={{ padding: '2em 0em' }}>
                     <Grid.Row>
                         <h1>{this.props.trip.name}</h1>
@@ -212,23 +258,15 @@ export default class POIForm extends Component {
                                 <Table.Row>
                                     <Table.HeaderCell />
                                     <Table.HeaderCell colSpan='3'>
-                                        <Modal
-                                            closeIcon
-                                            trigger={<Button
-                                                floated='right'
-                                                icon
-                                                labelPosition='left'
-                                                primary
-                                                size='small'
-                                            >
-                                                <Icon name='add circle' /> Add Trip
-                                            </Button>}
-                                        >
-                                            <Modal.Header>New Point of Interest Details</Modal.Header>
-                                            <Modal.Content>
-                                            </Modal.Content>
-                                        </Modal>
-
+                                        <Button
+                                            floated='right'
+                                            icon
+                                            labelPosition='left'
+                                            primary
+                                            size='small'
+                                            onClick={()=> this.setNewPOIModal()}>
+                                            <Icon name='add circle' /> Add POI
+                                        </Button>
                                     </Table.HeaderCell>
                                 </Table.Row>
                             </Table.Footer>
@@ -237,23 +275,23 @@ export default class POIForm extends Component {
 
                     <Modal
                         closeIcon
-                        open={this.state.editModalOpen}
+                        open={this.state.editPOIModalOpen}
                         onClose={() => this.showEditForm()}
                     >
                         <Modal.Header>Edit Trip Details</Modal.Header>
                         <Modal.Content>
                             <Form id="poi-form" onSubmit={this.handleSubmit}>
+                                <Form.Field
+                                    onChange={(e) => this.handleChange(e)}
+                                    id='name'
+                                    name='name'
+                                    control={Input}
+                                    label='Name'
+                                    value={this.state.name}
+                                />
+                                <div>
                                     <Form.Field
-                                        onChange={(e) => this.handleChange(e)}
-                                        id='name'
-                                        name='name'
-                                        control={Input}
-                                        label='Name'
-                                        value={this.state.name}
-                                    />
-                                    <div>
-                                    <Form.Field
-                                        onChange={(e) => {this.handleChange(e); this.getMapboxPOI(e)}}
+                                        onChange={(e) => { this.handleChange(e); this.getMapboxPOI(e) }}
                                         id='address'
                                         name='address'
                                         control={Input}
@@ -261,24 +299,73 @@ export default class POIForm extends Component {
                                         value={this.state.address}
                                     />
                                     <div className="overlapped">
-                                {this.state.poiSuggestionModal && this.state.suggestionList.map((name, i) => {
-                                    return (
-                                        <Button.Group widths='3'>
-                                            <Button inverted compact color="instagram" className="ui top attached button" onClick={() => this.setInput(name.address)}>{name.address}</Button>
-                                        </Button.Group>
-                                    )
-                                })}
-                            </div>
-                            </div>
+                                        {this.state.poiSuggestionModal && this.state.suggestionList.map((name, i) => {
+                                            return (
+                                                <Button.Group widths='3'>
+                                                    <Button inverted compact color="instagram" className="ui top attached button" onClick={() => this.setInput(name.address)}>{name.address}</Button>
+                                                </Button.Group>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
                             </Form>
                         </Modal.Content>
                         <Modal.Actions>
-                            <Button primary compact 
-                            form='poi-form'
-                            type="submit"
-                            content="Edit POI"
-                            labelPosition='left'
-                            icon='checkmark'
+                            <Button primary compact
+                                form='poi-form'
+                                type="submit"
+                                content="Edit POI"
+                                labelPosition='left'
+                                icon='checkmark'
+                            />
+                        </Modal.Actions>
+                    </Modal>
+
+                    <Modal
+                        closeIcon
+                        open={this.state.newPOIModalOpen}
+                        onClose={() => this.setNewPOIModal()}
+                        onOpen={() => this.setNewPOIModal()}
+                    >
+                        <Modal.Header>New Point of Interest Details</Modal.Header>
+                        <Modal.Content>
+                            <Form id="new-poi-form" onSubmit={this.handleAddPOI}>
+                                <Form.Field
+                                    onChange={(e) => this.handleChange(e)}
+                                    id='name'
+                                    name='name'
+                                    control={Input}
+                                    label='Name'
+                                    value={this.state.name}
+                                />
+                                <div>
+                                    <Form.Field
+                                        onChange={(e) => { this.handleChange(e); this.getMapboxPOI(e) }}
+                                        id='address'
+                                        name='address'
+                                        control={Input}
+                                        label='Address'
+                                        value={this.state.address}
+                                    />
+                                    <div className="overlapped">
+                                        {this.state.poiSuggestionModal && this.state.suggestionList.map((name, i) => {
+                                            return (
+                                                <Button.Group widths='3'>
+                                                    <Button inverted compact color="instagram" className="ui top attached button" onClick={() => this.setInput(name.address)}>{name.address}</Button>
+                                                </Button.Group>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
+                            </Form>
+                        </Modal.Content>
+                        <Modal.Actions>
+                            <Button positive compact
+                                form='new-poi-form'
+                                type="submit"
+                                content="New POI"
+                                labelPosition='left'
+                                icon='add'
                             />
                         </Modal.Actions>
                     </Modal>

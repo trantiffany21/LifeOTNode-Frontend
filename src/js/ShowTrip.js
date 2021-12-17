@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Table, Button, Popup, Icon} from 'semantic-ui-react'
+import { Table, Button, Popup, Icon, Header, Grid} from 'semantic-ui-react'
 import POIForm from "./POIForm";
 import EditTrip from "./EditTrip";
 import NewTrip from "./NewTrip";
@@ -134,8 +134,10 @@ export default class ShowTrip extends Component {
 
     render() {
         return (
+            <Grid.Row>
+            {this.props.tripModalOpen &&
             <div className="TripContainer">
-                {this.props.tripModalOpen &&
+                <Header as='h1'>All Trips</Header>
                     <Table >
                         <Table.Header>
                             <Table.Row>
@@ -187,13 +189,15 @@ export default class ShowTrip extends Component {
                                 </Table.Row>
                             </Table.Footer>
                     </Table>
+                    </div>
                 }
                 <NewTrip userId={this.props.userId} baseURL={this.props.baseURL} addTrips={this.props.addTrips} tripModalOpen={this.props.tripModalOpen} setTripModalOpen={this.props.setTripModalOpen} newTripItem={this.state.newTripItem} setNewTripItem={this.setNewTripItem}/>
 
                 <EditTrip editModalOpen={this.state.editModalOpen} setEditModalOpen={this.setEditModalOpen} handleChange={this.handleChange} handleSubmit={this.handleSubmit} name={this.state.name} origin={this.state.origin} destination={this.state.destination} lodgingName={this.state.lodgingName} setInput={this.setInput}/>
 
                 {this.props.poiModalOpen && <POIForm baseURL={this.props.baseURL} trip={this.state.tripToEdit} />}
-            </div>
+            </Grid.Row>
+            
         );
     }
 }

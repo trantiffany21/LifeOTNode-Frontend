@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Table, Form, Input, Button } from 'semantic-ui-react'
+import { Table, Form, Input, Button, Popup, Modal, Grid, Icon } from 'semantic-ui-react'
 
 export default class POIForm extends Component {
     constructor(props) {
@@ -10,8 +10,11 @@ export default class POIForm extends Component {
             address: "",
             pois: [],
             poiToEdit: {},
-            lat:"45.34",
-            long:"50.32"
+            lat: "",
+            long: "",
+            apiKey: process.env.REACT_APP_MAPBOX_API_KEY,
+            suggestionList: [],
+            poiSuggestionModal:false
         }
     }
 
@@ -44,9 +47,16 @@ export default class POIForm extends Component {
         }
     }
 
-    setPOIs = (pois) =>{
+    setPOIs = (pois) => {
         this.setState({
-          pois:pois
+            pois: pois
+        })
+    }
+    setInput = (name) => {
+        this.setState({
+            address: name,
+            suggestionList: [],
+            poiSuggestionModal:false
         })
     }
 
@@ -58,7 +68,7 @@ export default class POIForm extends Component {
                 method: 'PUT',
                 body: JSON.stringify({
                     name: e.target.name.value,
-                    address: e.target.address.value, 
+                    address: e.target.address.value,
                     trip: this.props.trip.id
                 }),
                 headers: {
@@ -68,7 +78,7 @@ export default class POIForm extends Component {
             })
 
             if (response.status === 200) {
-                const updatedPOI= await response.json()
+                const updatedPOI = await response.json()
                 const findIndex = this.state.pois.findIndex(poi => poi.id === updatedPOI.data.id)
                 const copyPOIs = [...this.state.pois]
                 copyPOIs[findIndex] = updatedPOI.data
@@ -99,54 +109,181 @@ export default class POIForm extends Component {
         this.getPois(this.props.trip)
     }
 
+    getMapboxSuggestions = async (place) => {
+        if (place.target.value !== "") {
+            let searchWord = place.target.value.replace(/\s/g, '%20')
+            let fetchUrl = "https://api.mapbox.com/geocoding/v5/mapbox.places/" + searchWord + ".json?types=place&access_token=" + this.state.apiKey
+            console.log(fetchUrl)
+            try {
+                const response = await fetch(fetchUrl)
+                const data = await response.json()
+                console.log(data.features)
+                let features = data.features
+                const arrPlaces = []
+                features.map((name, i) => {
+                    arrPlaces.push(name.place_name)
+                })
+                this.setState({
+                    suggestionList: arrPlaces
+                })
+                console.log(this.state.suggestionList)
+
+            } catch (err) {
+                console.log('Error => ', err)
+            }
+        } else {
+            this.setState({
+                suggestionList: []
+            })
+        }
+    }
+
+    getMapboxPOI = async (place) => {
+        if (place.target.value !== "") {
+            let searchWord = place.target.value.replace(/\s/g, '%20')
+            let fetchUrl = "https://api.mapbox.com/geocoding/v5/mapbox.places/" + searchWord + ".json?types=poi%2Caddress&access_token=" + this.state.apiKey
+            console.log(fetchUrl)
+            try {
+                const response = await fetch(fetchUrl)
+                const data = await response.json()
+                console.log(data.features)
+                let features = data.features
+                const arrPlaces = []
+                features.map((name, i) => {
+                    arrPlaces.push({
+                        name: name.text,
+                        address: name.place_name,
+                        long: name.geometry.coordinates[0],
+                        lat: name.geometry.coordinates[1]
+                    })
+                })
+                this.setState({
+                    suggestionList: arrPlaces,
+                    poiSuggestionModal: true
+                })
+                console.log(this.state.suggestionList)
+
+            } catch (err) {
+                console.log('Error => ', err)
+            }
+        } else {
+            this.setState({
+                suggestionList: []
+            })
+        }
+    }
+
     render() {
         return (
             <div className="POIContainer">
-                <Table >
-                    <Table.Header>
-                        <Table.Row>
-                            <Table.HeaderCell>Stop Name</Table.HeaderCell>
-                            <Table.HeaderCell>Address</Table.HeaderCell>
-                        </Table.Row>
-                    </Table.Header>
-                    <tbody>
-                        {this.state.pois.map((poi, i) => {
-                            return (
-                                <Table.Row key={poi.id}>
-                                    <Table.Cell>{poi.name}</Table.Cell>
-                                    <Table.Cell>{poi.address}</Table.Cell>
-                                    <Table.Cell> <Button positive compact onClick={() => this.showEditForm(poi)}>Edit</Button></Table.Cell>
-                                    <Table.Cell> <Button negative compact onClick={() => this.deletePOI(poi.id)}>Delete</Button></Table.Cell>
+                <Grid container style={{ padding: '2em 0em' }}>
+                    <Grid.Row>
+                        <h1>{this.props.trip.name}</h1>
+                    </Grid.Row>
+                    <Grid.Row>
+                        <Table definition>
+                            <Table.Header>
+                                <Table.Row>
+                                    <Table.HeaderCell />
+                                    <Table.HeaderCell>Stop Name</Table.HeaderCell>
+                                    <Table.HeaderCell>Address</Table.HeaderCell>
+                                    <Table.HeaderCell></Table.HeaderCell>
                                 </Table.Row>
-                            )
-                        })
-                        }
-                    </tbody>
-                </Table>
-                {this.state.editModalOpen &&
-                    <Form onSubmit={this.handleSubmit}>
-                        <Form.Group>
-                            <Form.Field
-                                onChange={(e) => this.handleChange(e)}
-                                id='name'
-                                name='name'
-                                control={Input}
-                                label='Name'
-                                value={this.state.name}
-                            />
-                            <Form.Field
-                                onChange={(e) => this.handleChange(e)}
-                                id='address'
-                                name='address'
-                                control={Input}
-                                label='Address'
-                                value={this.state.address}
-                            />
-                        </Form.Group>
-                        <Button primary compact type="submit"> Edit POI </Button>
-                    </Form>
-                }
+                            </Table.Header>
+                            <Table.Body>
+                                {this.state.pois.map((poi, i) => {
+                                    return (
+                                        <Table.Row key={poi.id}>
+                                            <Table.Cell collapsing >{i + 1}</Table.Cell>
+                                            <Table.Cell>{poi.name}</Table.Cell>
+                                            <Table.Cell >{poi.address}</Table.Cell>
+                                            <Table.Cell>
+                                                <Button.Group basic size="small" floated='right'>
+                                                    <Popup size="tiny" content='Edit' trigger={<Button icon='edit' onClick={() => this.showEditForm(poi)} />} />
+                                                    <Popup size="tiny" content='Delete Trip' trigger={<Button icon='trash alternate' onClick={() => this.deletePOI(poi.id)} />} />
+                                                </Button.Group>
+                                            </Table.Cell>
+                                        </Table.Row>
+                                    )
+                                })
+                                }
+                            </Table.Body>
+                            <Table.Footer fullWidth>
+                                <Table.Row>
+                                    <Table.HeaderCell />
+                                    <Table.HeaderCell colSpan='3'>
+                                        <Modal
+                                            closeIcon
+                                            trigger={<Button
+                                                floated='right'
+                                                icon
+                                                labelPosition='left'
+                                                primary
+                                                size='small'
+                                            >
+                                                <Icon name='add circle' /> Add Trip
+                                            </Button>}
+                                        >
+                                            <Modal.Header>New Point of Interest Details</Modal.Header>
+                                            <Modal.Content>
+                                            </Modal.Content>
+                                        </Modal>
 
+                                    </Table.HeaderCell>
+                                </Table.Row>
+                            </Table.Footer>
+                        </Table>
+                    </Grid.Row>
+
+                    <Modal
+                        closeIcon
+                        open={this.state.editModalOpen}
+                        onClose={() => this.showEditForm()}
+                    >
+                        <Modal.Header>Edit Trip Details</Modal.Header>
+                        <Modal.Content>
+                            <Form id="poi-form" onSubmit={this.handleSubmit}>
+                                    <Form.Field
+                                        onChange={(e) => this.handleChange(e)}
+                                        id='name'
+                                        name='name'
+                                        control={Input}
+                                        label='Name'
+                                        value={this.state.name}
+                                    />
+                                    <div>
+                                    <Form.Field
+                                        onChange={(e) => {this.handleChange(e); this.getMapboxPOI(e)}}
+                                        id='address'
+                                        name='address'
+                                        control={Input}
+                                        label='Address'
+                                        value={this.state.address}
+                                    />
+                                    <div className="overlapped">
+                                {this.state.poiSuggestionModal && this.state.suggestionList.map((name, i) => {
+                                    return (
+                                        <Button.Group widths='3'>
+                                            <Button inverted compact color="instagram" className="ui top attached button" onClick={() => this.setInput(name.address)}>{name.address}</Button>
+                                        </Button.Group>
+                                    )
+                                })}
+                            </div>
+                            </div>
+                            </Form>
+                        </Modal.Content>
+                        <Modal.Actions>
+                            <Button primary compact 
+                            form='poi-form'
+                            type="submit"
+                            content="Edit POI"
+                            labelPosition='left'
+                            icon='checkmark'
+                            />
+                        </Modal.Actions>
+                    </Modal>
+
+                </Grid>
             </div>
         );
     }

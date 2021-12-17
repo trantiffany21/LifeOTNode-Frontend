@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Form, Input, Button } from "semantic-ui-react";
+import { Form, Input, Button, Modal } from "semantic-ui-react";
 
 export default class NewTrip extends Component {
     constructor(props) {
@@ -14,7 +14,6 @@ export default class NewTrip extends Component {
             lodgingLong: "",
             apiKey: process.env.REACT_APP_MAPBOX_API_KEY,
             suggestionList: [],
-            newTripItem: false
         }
     }
     getMapboxSuggestions = async (place) => {
@@ -149,6 +148,7 @@ export default class NewTrip extends Component {
             return res.json()
         }).then(data => {
             this.props.addTrips(data.data)
+            this.props.setNewTripItem()
             this.setState({
                 name: "",
                 origin: "",
@@ -163,26 +163,33 @@ export default class NewTrip extends Component {
     render() {
         return (
             <div className="NewTripContainer">
-                
-                        <Form onSubmit={this.handleSubmit}>
+                <Modal
+                    closeIcon
+                    open={this.props.newTripItem}
+                    onClose={() => this.props.setNewTripItem()}
+                    onOpen={() => this.props.setNewTripItem()}
+                >
+                    <Modal.Header>New Trip Details</Modal.Header>
+                    <Modal.Content>
+                        <Form id="new-trip-form" onSubmit={this.handleSubmit}>
+                            <Form.Field
+                                onChange={(e) => this.handleChange(e)}
+                                id='name'
+                                name='name'
+                                control={Input}
+                                label='Name'
+                                value={this.state.name}
+                            />
+                            <div >
                                 <Form.Field
-                                    onChange={(e) => this.handleChange(e)}
-                                    id='name'
-                                    name='name'
+                                    onChange={(e) => { this.handleChange(e); this.getMapboxSuggestions(e); this.setSuggestion("origin") }}
+                                    id='origin'
+                                    name='origin'
                                     control={Input}
-                                    label='Name'
-                                    value={this.state.name}
+                                    label='Origin'
+                                    value={this.state.origin}
                                 />
-                                <div >
-                                    <Form.Field
-                                        onChange={(e) => { this.handleChange(e); this.getMapboxSuggestions(e); this.setSuggestion("origin") }}
-                                        id='origin'
-                                        name='origin'
-                                        control={Input}
-                                        label='Origin'
-                                        value={this.state.origin}
-                                    />
-                                    <div className="overlapped">
+                                <div className="overlapped">
                                     {this.state.suggestionModal === "origin" && this.state.suggestionList.map((name, i) => {
                                         return (
                                             <Button.Group widths='3'>
@@ -190,18 +197,18 @@ export default class NewTrip extends Component {
                                             </Button.Group>
                                         )
                                     })}
-                                    </div>
                                 </div>
-                                <div>
-                                    <Form.Field
-                                        onChange={(e) => { this.handleChange(e); this.getMapboxSuggestions(e); this.setSuggestion("destination") }}
-                                        id='destination'
-                                        name='destination'
-                                        control={Input}
-                                        label='Destination'
-                                        value={this.state.destination}
-                                    />
-                                    <div className="overlapped">
+                            </div>
+                            <div>
+                                <Form.Field
+                                    onChange={(e) => { this.handleChange(e); this.getMapboxSuggestions(e); this.setSuggestion("destination") }}
+                                    id='destination'
+                                    name='destination'
+                                    control={Input}
+                                    label='Destination'
+                                    value={this.state.destination}
+                                />
+                                <div className="overlapped">
                                     {this.state.suggestionModal === "destination" && this.state.suggestionList.map((name, i) => {
                                         return (
                                             <Button.Group widths='3'>
@@ -209,8 +216,8 @@ export default class NewTrip extends Component {
                                             </Button.Group>
                                         )
                                     })}
-                                    </div>
                                 </div>
+                            </div>
                             <Form.Field
                                 onChange={(e) => { this.handleChange(e); this.getLodging(e); this.setSuggestion("lodging") }}
                                 id='lodgingName'
@@ -220,17 +227,27 @@ export default class NewTrip extends Component {
                                 value={this.state.lodgingName}
                             />
                             <div className="overlapped">
-                            {this.state.suggestionModal === "lodging" && this.state.suggestionList.map((name, i) => {
-                                return (
-                                    <Button.Group widths='3'>
-                                        <Button inverted compact color="instagram" className="ui top attached button" onClick={() => this.setInput("lodging", name)}>{name.address}</Button>
-                                    </Button.Group>
-                                )
-                            })}
+                                {this.state.suggestionModal === "lodging" && this.state.suggestionList.map((name, i) => {
+                                    return (
+                                        <Button.Group widths='3'>
+                                            <Button inverted compact color="instagram" className="ui top attached button" onClick={() => this.setInput("lodging", name)}>{name.address}</Button>
+                                        </Button.Group>
+                                    )
+                                })}
                             </div>
-                            <Button primary compact type="submit"> New Trip </Button>
                         </Form>
-                    
+                    </Modal.Content>
+                    <Modal.Actions>
+                        <Button positive compact
+                            form='new-trip-form'
+                            type="submit"
+                            content="New Trip"
+                            labelPosition='left'
+                            icon='add'
+                        />
+                    </Modal.Actions>
+                </Modal>
+
             </div>
         );
     }

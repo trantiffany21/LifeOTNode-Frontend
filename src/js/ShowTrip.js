@@ -1,7 +1,8 @@
 import React, { Component } from "react";
-import { Table, Button, Popup } from 'semantic-ui-react'
+import { Table, Button, Popup, Icon} from 'semantic-ui-react'
 import POIForm from "./POIForm";
 import EditTrip from "./EditTrip";
+import NewTrip from "./NewTrip";
 
 export default class ShowTrip extends Component {
     constructor(props) {
@@ -13,7 +14,17 @@ export default class ShowTrip extends Component {
             destination: "",
             lodgingName: "",
             lodgingAddress: "",
-            tripToEdit: {}
+            tripToEdit: {},
+            newTripItem: false
+        }
+    }
+    setNewTripItem = () => {
+        if (this.state.newTripItem) {
+            this.setState({ newTripItem: false })
+        } else {
+            this.setState({
+                newTripItem: true,
+            })
         }
     }
     setEditModalOpen = () => {
@@ -136,11 +147,11 @@ export default class ShowTrip extends Component {
                                 <Table.HeaderCell></Table.HeaderCell>
                             </Table.Row>
                         </Table.Header>
-                        <tbody>
+                        <Table.Body>
                             {this.props.trips.map((trip, i) => {
                                 return (
                                     <Table.Row key={trip.id}>
-                                        <Table.Cell>{trip.name}</Table.Cell>
+                                        <Table.Cell singleLine>{trip.name}</Table.Cell>
                                         <Table.Cell>{trip.origin}</Table.Cell>
                                         <Table.Cell>{trip.destination}</Table.Cell>
                                         <Table.Cell>{trip.lodging.lodging_name}</Table.Cell>
@@ -148,8 +159,7 @@ export default class ShowTrip extends Component {
                                         <Table.Cell>
                                             <Button.Group basic size='small'>
                                                 <Popup size="tiny" content='Points of Interest' trigger={<Button icon='map outline' onClick={() => this.showPOIForm(trip)} />} />
-                                                <EditTrip showEditForm={this.showEditForm} trip={trip} handleChange={this.handleChange} handleSubmit={this.handleSubmit} name={this.state.name} origin={this.state.origin} destination={this.state.destination} lodgingName={this.state.lodgingName} setInput={this.setInput}/>
-
+                                                <Popup size="tiny" content='Edit' trigger={<Button icon='edit' onClick={() => this.showEditForm(trip)} />} />
                                                 <Popup size="tiny" content='Delete Trip' trigger={<Button icon='trash alternate' onClick={() => this.deleteTrip(trip.id)} />} />
                                             </Button.Group>
                                         </Table.Cell>
@@ -157,9 +167,30 @@ export default class ShowTrip extends Component {
                                 )
                             })
                             }
-                        </tbody>
+                        </Table.Body>
+                        <Table.Footer fullWidth>
+                                <Table.Row>
+                                    <Table.HeaderCell />
+                                    <Table.HeaderCell colSpan='5'>
+                                        <Button
+                                                floated='right'
+                                                icon
+                                                labelPosition='left'
+                                                primary
+                                                size='small'
+                                                onClick={()=> this.setNewTripItem()}
+                                            >
+                                                <Icon name='add circle' /> Add Trip
+                                            </Button>
+
+                                    </Table.HeaderCell>
+                                </Table.Row>
+                            </Table.Footer>
                     </Table>
                 }
+                <NewTrip userId={this.props.userId} baseURL={this.props.baseURL} addTrips={this.props.addTrips} tripModalOpen={this.props.tripModalOpen} setTripModalOpen={this.props.setTripModalOpen} newTripItem={this.state.newTripItem} setNewTripItem={this.setNewTripItem}/>
+
+                <EditTrip editModalOpen={this.state.editModalOpen} setEditModalOpen={this.setEditModalOpen} handleChange={this.handleChange} handleSubmit={this.handleSubmit} name={this.state.name} origin={this.state.origin} destination={this.state.destination} lodgingName={this.state.lodgingName} setInput={this.setInput}/>
 
                 {this.props.poiModalOpen && <POIForm baseURL={this.props.baseURL} trip={this.state.tripToEdit} />}
             </div>

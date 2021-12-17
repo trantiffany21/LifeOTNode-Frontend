@@ -130,20 +130,10 @@ export default class UserLogin extends Component {
         if (this.props.userLoggedIn) {
             return(
                 <Grid container style={{ padding: '2em 0em' }}>
-                {this.props.tripModalOpen &&
-                    <Modal
-                    closeIcon
-                    trigger={<Button positive>+ New Trip</Button>}
-                    actions={{ key: 'done', content: 'Done', positive: true }}
-                >
-                    <Modal.Header>New Trip Details</Modal.Header>
-                    <Modal.Content>
-                            <NewTrip userId={this.props.userId} baseURL={baseURL} addTrips={this.addTrips} />
-                            </Modal.Content>
-                </Modal>
-                }
+                    
+                    <NewTrip userId={this.props.userId} baseURL={baseURL} addTrips={this.addTrips} tripModalOpen={this.props.tripModalOpen} setTripModalOpen={this.props.setTripModalOpen} />
                     <Grid.Row>
-                        <ShowTrip trips={this.state.trips} baseURL={baseURL} setTrips={this.setTrips} tripModalOpen={this.props.tripModalOpen} setTripModalOpen={this.props.setTripModalOpen} poiModalOpen={this.props.poiModalOpen} setPoiModalOpen={this.props.setPoiModalOpen}/>
+                        <ShowTrip userId={this.props.userId} addTrips={this.addTrips} trips={this.state.trips} baseURL={baseURL} setTrips={this.setTrips} tripModalOpen={this.props.tripModalOpen} setTripModalOpen={this.props.setTripModalOpen} poiModalOpen={this.props.poiModalOpen} setPoiModalOpen={this.props.setPoiModalOpen}/>
                     </Grid.Row>
                 </Grid>
             )

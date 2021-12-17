@@ -50,7 +50,7 @@ function App() {
             {userLoggedIn &&
             <Menu.Item>
               <Dropdown item inline text={helloMsg} >
-              <Dropdown.Menu simple item>
+              <Dropdown.Menu>
                 <Dropdown.Item>My Account</Dropdown.Item>
                 <Dropdown.Item onClick={() =>{setTripModalOpen(true); setPoiModalOpen(false)}}>My Trips</Dropdown.Item>
                 <Dropdown.Item onClick={() => {setUserModalOpen(false); clearUser()}}>Log Out</Dropdown.Item>

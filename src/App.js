@@ -3,11 +3,13 @@ import React, { useState } from 'react';
 import { Button, Menu, Dropdown, Image, Segment, List, Grid, Header, Divider, Container, Icon } from 'semantic-ui-react'
 import UserLogin from './js/UserLogin';
 import routeImg from './imgs/route.png'
+import roadGif from './imgs/IMG_9697.gif'
 
 function App() {
   const [userId, setUserId] = useState("")
   const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
+  const [homeModalOpen, setHomeModalOpen] = useState(true)
   const [userLoggedIn, setUserLoggedIn] = useState(false)
   const [userModalOpen, setUserModalOpen] = useState(false)
   const [tripModalOpen, setTripModalOpen] = useState(false)
@@ -26,6 +28,7 @@ function App() {
     setUsername("")
     setUserId("")
     setEmail("")
+    setHomeModalOpen(true)
     setUserLoggedIn(false)
     setUserModalOpen(false)
     setTripModalOpen(false)
@@ -36,16 +39,18 @@ function App() {
   return (
     <div className="App">
       <Menu fixed='top' inverted borderless >
-        <Menu.Item as='a' header className="title">
+        <Menu.Item header className="title">
           <Image size='mini' src={routeImg} style={{ marginRight: '5em' }} />
-          Life on the Node <Icon name='location arrow' style={{ marginLeft: '.5em' }}/>
+          Life on the Node
         </Menu.Item>
 
 
         <Menu.Menu position='right'>
           {!userLoggedIn &&
-            <Menu.Item>
-              <Button onClick={() => setUserModalOpen(true)}> Log In or Sign Up</Button>
+            <Menu.Item className="menu-drop"
+              onClick={()=>{setUserModalOpen(true); setHomeModalOpen(false)}}
+            >
+              Log In or Sign Up
             </Menu.Item>
           }
           {userLoggedIn &&
@@ -62,11 +67,14 @@ function App() {
 
         </Menu.Menu>
       </Menu>
+      {homeModalOpen &&
+      <Image fluid verticalAlign='middle' style={{ height: '100vh' }} src={roadGif} />}
+
       {userModalOpen &&
         <UserLogin userId={userId} username={username} email={email} userLoggedIn={userLoggedIn} setUser={setUser} clearUser={clearUser} tripModalOpen={tripModalOpen} setTripModalOpen={setTripModalOpen} poiModalOpen={poiModalOpen} setPoiModalOpen={setPoiModalOpen} />}
-      
 
-      <Segment inverted vertical style={{ margin: '5em 0em 0em', padding: '5em 0em' }}>
+
+      <Segment inverted vertical style={{ padding: '5em 0em' }}>
         <Container textAlign='center'>
           <Grid divided inverted stackable>
             <Grid.Column width={3}>
@@ -88,9 +96,9 @@ function App() {
               </List>
             </Grid.Column>
             <Grid.Column width={3}>
-              <Header inverted as='h4' content='Group 3' />
+              <Header inverted as='h4' content='Powered By' />
               <List link inverted>
-                <List.Item as='a'>Link One</List.Item>
+                <List.Item as='a' target="_blank" rel="noopener noreferrer" href='https://www.flaticon.com/'>Icons by Flaticon</List.Item>
                 <List.Item as='a'>Link Two</List.Item>
                 <List.Item as='a'>Link Three</List.Item>
                 <List.Item as='a'>Link Four</List.Item>
@@ -108,11 +116,11 @@ function App() {
           <Image centered size='mini' src={routeImg} />
           <List horizontal inverted divided link size='small'>
             <List.Item as='a' target="_blank" rel="noopener noreferrer" href='https://github.com/trantiffany21/LifeOTNode-Frontend'>
-            <List.Icon name='github' />
+              <List.Icon name='github' />
               GitHub
             </List.Item>
             <List.Item as='a' href='#'>
-            © 2021 Life on the Node. All Rights Reserved.
+              © 2021 Life on the Node. All Rights Reserved.
             </List.Item>
           </List>
         </Container>

@@ -1,5 +1,7 @@
 import React, { Component } from "react";
-import { Table, Form, Input, Button, Popup, Modal, Grid, Icon, Header } from 'semantic-ui-react'
+import { Table, Form, Input, Button, Popup, Modal, Grid, Icon, Header, Segment, Message } from 'semantic-ui-react'
+import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
+mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_API_KEY
 
 export default class POIForm extends Component {
     constructor(props) {
@@ -7,6 +9,7 @@ export default class POIForm extends Component {
         this.state = {
             editPOIModalOpen: false,
             newPOIModalOpen: false,
+            mapModalOpen: false,
             name: "",
             address: "",
             pois: [],
@@ -15,8 +18,9 @@ export default class POIForm extends Component {
             long: "",
             apiKey: process.env.REACT_APP_MAPBOX_API_KEY,
             suggestionList: [],
-            poiSuggestionModal: false
+            poiSuggestionModal: false,
         }
+        this.mapContainer = React.createRef();
     }
 
     getPois = (trip) => {
@@ -61,6 +65,20 @@ export default class POIForm extends Component {
         } else {
             this.setState({
                 newPOIModalOpen: true,
+                name: "",
+                address: "",
+                lat: "",
+                long: ""
+            })
+        }
+    }
+    setMapModal = () => {
+        
+        if (this.state.mapModalOpen) {
+            this.setState({ mapModalOpen: false })
+        } else {
+            this.setState({
+                mapModalOpen: true,
             })
         }
     }
@@ -72,21 +90,25 @@ export default class POIForm extends Component {
     }
     setInput = (name) => {
         this.setState({
-            address: name,
+            address: name.address,
+            lat: name.lat,
+            long: name.long,
             suggestionList: [],
             poiSuggestionModal: false
         })
     }
 
-    handleSubmit = async (e) => {
+    handleEdit = async (e) => {
         e.preventDefault()
         const editUrl = this.props.baseURL + 'trips/pois/' + this.state.poiToEdit.id
         try {
             const response = await fetch(editUrl, {
                 method: 'PUT',
                 body: JSON.stringify({
-                    name: e.target.name.value,
-                    address: e.target.address.value,
+                    name: this.state.name,
+                    address: this.state.address,
+                    lat: this.state.lat,
+                    long: this.state.long,
                     trip: this.props.trip.id
                 }),
                 headers: {
@@ -101,6 +123,7 @@ export default class POIForm extends Component {
                 const copyPOIs = [...this.state.pois]
                 copyPOIs[findIndex] = updatedPOI.data
                 this.setPOIs(copyPOIs)
+                this.showMap(updatedPOI.data)
                 this.setState({
                     editPOIModalOpen: false
                 })
@@ -128,6 +151,7 @@ export default class POIForm extends Component {
             return res.json()
         }).then(data => {
             this.addPOI(data.data)
+            this.showMap(data.data)
             this.setNewPOIModal()
             this.setState({
                 name: "",
@@ -148,10 +172,6 @@ export default class POIForm extends Component {
             copyPOIs.splice(findIndex, 1)
             this.setPOIs(copyPOIs)
         })
-    }
-
-    componentDidMount() {
-        this.getPois(this.props.trip)
     }
 
     getMapboxSuggestions = async (place) => {
@@ -218,10 +238,40 @@ export default class POIForm extends Component {
         }
     }
 
+    showMap = (poi) => {
+
+        let lng = poi.long
+        let lat = poi.lat
+        let zoom = 15
+        const mapName = poi.address.split(',')[0]
+        const map = new mapboxgl.Map({
+            container: this.mapContainer.current,
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [lng, lat],
+            zoom: zoom
+        });
+
+        const marker = new mapboxgl.Marker({
+            color: "#0E6EB8",
+            draggable: false
+        }).setLngLat([lng, lat])
+            .setPopup(new mapboxgl.Popup().setHTML("<Message compact verticalAlign='middle' className='map-text'>" + mapName + "</Message>")) // add popup
+            .addTo(map);
+        marker.togglePopup()
+
+
+
+    }
+    componentDidMount() {
+        this.getPois(this.props.trip)
+
+
+    }
+
     render() {
         return (
             <div className="POIContainer">
-                <Header as='h1'>Points of Interest</Header>
+                <Header as='h1'>Points of Interest <Icon name='map signs' /></Header>
                 <Grid container style={{ padding: '2em 0em' }}>
                     <Grid.Row>
                         <h1>{this.props.trip.name}</h1>
@@ -245,7 +295,7 @@ export default class POIForm extends Component {
                                             <Table.Cell >{poi.address}</Table.Cell>
                                             <Table.Cell>
                                                 <Button.Group basic size="small" floated='right'>
-                                                    <Popup size="tiny" content='Map It' trigger={<Button icon='map marker alternate'  />} />
+                                                    <Popup size="tiny" content='Map It' trigger={<Button icon='map marker alternate' onClick={() => this.showMap(poi)} />} />
                                                     <Popup size="tiny" content='Edit' trigger={<Button icon='edit' onClick={() => this.showEditForm(poi)} />} />
                                                     <Popup size="tiny" content='Delete Trip' trigger={<Button icon='trash alternate' onClick={() => this.deletePOI(poi.id)} />} />
                                                 </Button.Group>
@@ -265,7 +315,7 @@ export default class POIForm extends Component {
                                             labelPosition='left'
                                             primary
                                             size='small'
-                                            onClick={()=> this.setNewPOIModal()}>
+                                            onClick={() => this.setNewPOIModal()}>
                                             <Icon name='add circle' /> Add POI
                                         </Button>
                                     </Table.HeaderCell>
@@ -274,6 +324,7 @@ export default class POIForm extends Component {
                         </Table>
                     </Grid.Row>
 
+
                     <Modal
                         closeIcon
                         open={this.state.editPOIModalOpen}
@@ -281,7 +332,7 @@ export default class POIForm extends Component {
                     >
                         <Modal.Header>Edit Trip Details</Modal.Header>
                         <Modal.Content>
-                            <Form id="poi-form" onSubmit={this.handleSubmit}>
+                            <Form id="poi-form" onSubmit={this.handleEdit}>
                                 <Form.Field
                                     onChange={(e) => this.handleChange(e)}
                                     id='name'
@@ -303,7 +354,7 @@ export default class POIForm extends Component {
                                         {this.state.poiSuggestionModal && this.state.suggestionList.map((name, i) => {
                                             return (
                                                 <Button.Group widths='3'>
-                                                    <Button inverted compact color="instagram" className="ui top attached button" onClick={() => this.setInput(name.address)}>{name.address}</Button>
+                                                    <Button inverted compact color="instagram" className="ui top attached button" onClick={() => this.setInput(name)}>{name.address}</Button>
                                                 </Button.Group>
                                             )
                                         })}
@@ -352,7 +403,7 @@ export default class POIForm extends Component {
                                         {this.state.poiSuggestionModal && this.state.suggestionList.map((name, i) => {
                                             return (
                                                 <Button.Group widths='3'>
-                                                    <Button inverted compact color="instagram" className="ui top attached button" onClick={() => this.setInput(name.address)}>{name.address}</Button>
+                                                    <Button inverted compact color="instagram" className="ui top attached button" onClick={() => this.setInput(name)}>{name.address}</Button>
                                                 </Button.Group>
                                             )
                                         })}
@@ -371,8 +422,10 @@ export default class POIForm extends Component {
                         </Modal.Actions>
                     </Modal>
 
+
                 </Grid>
-            </div>
+                    <div ref={this.mapContainer} className="map" />
+            </div >
         );
     }
 }

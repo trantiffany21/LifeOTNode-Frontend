@@ -66,3 +66,16 @@
 .menu-drop{
   font-size: 15px;
 }
+
+
+.map-container {
+  height: 400px;
+  width: 75%;
+  }
+.map {
+  height: 400px;
+  width: 100%;
+  }
+.map-text{
+  font-family: 'Noto Sans JP', sans-serif;
+}

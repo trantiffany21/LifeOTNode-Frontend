@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Table, Button, Popup, Icon, Header, Grid} from 'semantic-ui-react'
+import { Table, Button, Popup, Icon, Header, Grid, Container} from 'semantic-ui-react'
 import POIForm from "./POIForm";
 import EditTrip from "./EditTrip";
 import NewTrip from "./NewTrip";
@@ -137,7 +137,7 @@ export default class ShowTrip extends Component {
             <Grid.Row>
             {this.props.tripModalOpen &&
             <div className="TripContainer">
-                <Header as='h1'>All Trips</Header>
+                <Header as='h1'>All Trips <Icon name='plane' /></Header>
                     <Table >
                         <Table.Header>
                             <Table.Row>
@@ -160,6 +160,7 @@ export default class ShowTrip extends Component {
                                         <Table.Cell>{trip.lodging.lodging_address}</Table.Cell>
                                         <Table.Cell>
                                             <Button.Group basic size='small'>
+                                            <Popup size="tiny" content='Map It' trigger={<Button icon='map marker alternate'  />} />
                                                 <Popup size="tiny" content='Points of Interest' trigger={<Button icon='map outline' onClick={() => this.showPOIForm(trip)} />} />
                                                 <Popup size="tiny" content='Edit' trigger={<Button icon='edit' onClick={() => this.showEditForm(trip)} />} />
                                                 <Popup size="tiny" content='Delete Trip' trigger={<Button icon='trash alternate' onClick={() => this.deleteTrip(trip.id)} />} />

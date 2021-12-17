@@ -1,8 +1,8 @@
 import './App.css';
 import React, { useState } from 'react';
-import { Button, Menu, Dropdown } from 'semantic-ui-react'
+import { Button, Menu, Dropdown, Image, Segment, List, Grid, Header, Divider, Container, Icon } from 'semantic-ui-react'
 import UserLogin from './js/UserLogin';
-
+import routeImg from './imgs/route.png'
 
 function App() {
   const [userId, setUserId] = useState("")
@@ -35,34 +35,88 @@ function App() {
 
   return (
     <div className="App">
-      <Menu size='small'>
-        <Menu.Item
-          name='Life on the Node'
-        />
+      <Menu fixed='top' inverted borderless >
+        <Menu.Item as='a' header className="title">
+          <Image size='mini' src={routeImg} style={{ marginRight: '5em' }} />
+          Life on the Node <Icon name='location arrow' style={{ marginLeft: '.5em' }}/>
+        </Menu.Item>
 
 
         <Menu.Menu position='right'>
-            {!userLoggedIn &&
+          {!userLoggedIn &&
             <Menu.Item>
               <Button onClick={() => setUserModalOpen(true)}> Log In or Sign Up</Button>
-              </Menu.Item>
-            }
-            {userLoggedIn &&
-            <Menu.Item>
-              <Dropdown item inline text={helloMsg} >
-              <Dropdown.Menu>
-                <Dropdown.Item>My Account</Dropdown.Item>
-                <Dropdown.Item onClick={() =>{setTripModalOpen(true); setPoiModalOpen(false)}}>My Trips</Dropdown.Item>
-                <Dropdown.Item onClick={() => {setUserModalOpen(false); clearUser()}}>Log Out</Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
             </Menu.Item>
-            }
-          
+          }
+          {userLoggedIn &&
+            <Menu.Item>
+              <Dropdown item inline text={helloMsg} className="menu-drop">
+                <Dropdown.Menu>
+                  <Dropdown.Item>My Account</Dropdown.Item>
+                  <Dropdown.Item onClick={() => { setTripModalOpen(true); setPoiModalOpen(false) }}>My Trips</Dropdown.Item>
+                  <Dropdown.Item onClick={() => { setUserModalOpen(false); clearUser() }}>Log Out</Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            </Menu.Item>
+          }
+
         </Menu.Menu>
       </Menu>
       {userModalOpen &&
-        <UserLogin userId={userId} username={username} email={email} userLoggedIn={userLoggedIn} setUser={setUser} clearUser={clearUser} tripModalOpen={tripModalOpen} setTripModalOpen={setTripModalOpen} poiModalOpen={poiModalOpen} setPoiModalOpen={setPoiModalOpen}/>}
+        <UserLogin userId={userId} username={username} email={email} userLoggedIn={userLoggedIn} setUser={setUser} clearUser={clearUser} tripModalOpen={tripModalOpen} setTripModalOpen={setTripModalOpen} poiModalOpen={poiModalOpen} setPoiModalOpen={setPoiModalOpen} />}
+      
+
+      <Segment inverted vertical style={{ margin: '5em 0em 0em', padding: '5em 0em' }}>
+        <Container textAlign='center'>
+          <Grid divided inverted stackable>
+            <Grid.Column width={3}>
+              <Header inverted as='h4' content='Group 1' />
+              <List link inverted>
+                <List.Item as='a'>Link One</List.Item>
+                <List.Item as='a'>Link Two</List.Item>
+                <List.Item as='a'>Link Three</List.Item>
+                <List.Item as='a'>Link Four</List.Item>
+              </List>
+            </Grid.Column>
+            <Grid.Column width={3}>
+              <Header inverted as='h4' content='Group 2' />
+              <List link inverted>
+                <List.Item as='a'>Link One</List.Item>
+                <List.Item as='a'>Link Two</List.Item>
+                <List.Item as='a'>Link Three</List.Item>
+                <List.Item as='a'>Link Four</List.Item>
+              </List>
+            </Grid.Column>
+            <Grid.Column width={3}>
+              <Header inverted as='h4' content='Group 3' />
+              <List link inverted>
+                <List.Item as='a'>Link One</List.Item>
+                <List.Item as='a'>Link Two</List.Item>
+                <List.Item as='a'>Link Three</List.Item>
+                <List.Item as='a'>Link Four</List.Item>
+              </List>
+            </Grid.Column>
+            <Grid.Column width={7}>
+              <Header inverted as='h4' content='Footer Header' />
+              <p>
+                Extra space for a call to action inside the footer that could help re-engage users.
+              </p>
+            </Grid.Column>
+          </Grid>
+
+          <Divider inverted section />
+          <Image centered size='mini' src={routeImg} />
+          <List horizontal inverted divided link size='small'>
+            <List.Item as='a' target="_blank" rel="noopener noreferrer" href='https://github.com/trantiffany21/LifeOTNode-Frontend'>
+            <List.Icon name='github' />
+              GitHub
+            </List.Item>
+            <List.Item as='a' href='#'>
+            © 2021 Life on the Node. All Rights Reserved.
+            </List.Item>
+          </List>
+        </Container>
+      </Segment>
     </div>
   );
 }

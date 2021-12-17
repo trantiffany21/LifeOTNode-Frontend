@@ -245,6 +245,7 @@ export default class POIForm extends Component {
                                             <Table.Cell >{poi.address}</Table.Cell>
                                             <Table.Cell>
                                                 <Button.Group basic size="small" floated='right'>
+                                                    <Popup size="tiny" content='Map It' trigger={<Button icon='map marker alternate'  />} />
                                                     <Popup size="tiny" content='Edit' trigger={<Button icon='edit' onClick={() => this.showEditForm(poi)} />} />
                                                     <Popup size="tiny" content='Delete Trip' trigger={<Button icon='trash alternate' onClick={() => this.deletePOI(poi.id)} />} />
                                                 </Button.Group>

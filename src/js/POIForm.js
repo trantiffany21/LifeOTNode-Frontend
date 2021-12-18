@@ -1,4 +1,3 @@
-import * as turf from "@turf/turf";
 import React, { Component } from "react";
 import { Table, Form, Input, Button, Popup, Modal, Grid, Icon, Header, Segment, Message } from 'semantic-ui-react'
 import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax

@@ -32,7 +32,7 @@ Route Page:
 ![image](https://media.git.generalassemb.ly/user/37228/files/f24d2200-5208-11ec-87c4-f9a4b7f604d4)
 
 ### ERD
-![image](https://media.git.generalassemb.ly/user/37228/files/b1074300-5205-11ec-9400-155183fcc261)
+![image](https://user-images.githubusercontent.com/80294899/146647048-970cd33c-9f37-41d0-aa30-d22c8070dbb2.png)
 
 ## User Stories
 

@@ -57,7 +57,6 @@ function App() {
             <Menu.Item>
               <Dropdown item inline text={helloMsg} className="menu-drop">
                 <Dropdown.Menu>
-                  <Dropdown.Item>My Account</Dropdown.Item>
                   <Dropdown.Item onClick={() => { setTripModalOpen(true); setPoiModalOpen(false) }}>My Trips</Dropdown.Item>
                   <Dropdown.Item onClick={() => { setUserModalOpen(false); clearUser() }}>Log Out</Dropdown.Item>
                 </Dropdown.Menu>
@@ -75,42 +74,7 @@ function App() {
 
 
       <Segment inverted vertical style={{ padding: '5em 0em' }}>
-        <Container textAlign='center'>
-          <Grid divided inverted stackable>
-            <Grid.Column width={3}>
-              <Header inverted as='h4' content='Group 1' />
-              <List link inverted>
-                <List.Item as='a'>Link One</List.Item>
-                <List.Item as='a'>Link Two</List.Item>
-                <List.Item as='a'>Link Three</List.Item>
-                <List.Item as='a'>Link Four</List.Item>
-              </List>
-            </Grid.Column>
-            <Grid.Column width={3}>
-              <Header inverted as='h4' content='Group 2' />
-              <List link inverted>
-                <List.Item as='a'>Link One</List.Item>
-                <List.Item as='a'>Link Two</List.Item>
-                <List.Item as='a'>Link Three</List.Item>
-                <List.Item as='a'>Link Four</List.Item>
-              </List>
-            </Grid.Column>
-            <Grid.Column width={3}>
-              <Header inverted as='h4' content='Powered By' />
-              <List link inverted>
-                <List.Item as='a' target="_blank" rel="noopener noreferrer" href='https://www.flaticon.com/'>Icons by Flaticon</List.Item>
-                <List.Item as='a'>Link Two</List.Item>
-                <List.Item as='a'>Link Three</List.Item>
-                <List.Item as='a'>Link Four</List.Item>
-              </List>
-            </Grid.Column>
-            <Grid.Column width={7}>
-              <Header inverted as='h4' content='Footer Header' />
-              <p>
-                Extra space for a call to action inside the footer that could help re-engage users.
-              </p>
-            </Grid.Column>
-          </Grid>
+        <Container verticalAlign='right'>
 
           <Divider inverted section />
           <Image centered size='mini' src={routeImg} />
@@ -119,8 +83,10 @@ function App() {
               <List.Icon name='github' />
               GitHub
             </List.Item>
+            <List.Item as='a' target="_blank" rel="noopener noreferrer" href='https://www.mapbox.com/'>Mapbox API</List.Item>
+            <List.Item as='a' target="_blank" rel="noopener noreferrer" href='https://www.flaticon.com/'>Icons by Flaticon</List.Item>
             <List.Item as='a' href='#'>
-              © 2021 Life on the Node. All Rights Reserved.
+              © 2021 Life on the Node
             </List.Item>
           </List>
         </Container>

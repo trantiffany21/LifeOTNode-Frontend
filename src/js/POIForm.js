@@ -1,7 +1,9 @@
+import * as turf from "@turf/turf";
 import React, { Component } from "react";
 import { Table, Form, Input, Button, Popup, Modal, Grid, Icon, Header, Segment, Message } from 'semantic-ui-react'
 import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
 mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_API_KEY
+
 
 export default class POIForm extends Component {
     constructor(props) {
@@ -18,7 +20,11 @@ export default class POIForm extends Component {
             long: "",
             apiKey: process.env.REACT_APP_MAPBOX_API_KEY,
             suggestionList: [],
+            mapLodgingName: this.props.trip.lodging.lodging_name,
+            mapLodgingLong: this.props.trip.lodging.lodging_long,
+            mapLodgingLat: this.props.trip.lodging.lodging_lat,
             poiSuggestionModal: false,
+            optimzedModal: false
         }
         this.mapContainer = React.createRef();
     }
@@ -73,7 +79,7 @@ export default class POIForm extends Component {
         }
     }
     setMapModal = () => {
-        
+
         if (this.state.mapModalOpen) {
             this.setState({ mapModalOpen: false })
         } else {
@@ -258,10 +264,94 @@ export default class POIForm extends Component {
             .setPopup(new mapboxgl.Popup().setHTML("<Message compact verticalAlign='middle' className='map-text'>" + mapName + "</Message>")) // add popup
             .addTo(map);
         marker.togglePopup()
+    }
 
+    getPoiCoordinates = (pois) => {
+        let starting = [this.state.mapLodgingLong, this.state.mapLodgingLat]
+        let coordinateString = [starting]
+        this.state.pois.map((poi, i) => {
+            let tempCoordinate = [poi.long, poi.lat]
+            coordinateString.push(tempCoordinate)
+
+        })
+        return coordinateString.join(';')
 
 
     }
+
+    reorderPOIs = (pois, waypoints) =>{
+        const copyPOIs = [...this.state.pois]
+        const orderedPOIs = copyPOIs.map((poi,i) =>{
+            const newPOI = poi
+            newPOI.waypoint = waypoints[i].waypoint_index
+            return newPOI
+        })
+        orderedPOIs.sort((a, b) => (a.waypoint > b.waypoint) ? 1 : -1)
+        this.setState({pois: orderedPOIs, optimzedModal: true})
+        console.log(this.state.pois)
+    }
+
+    optimize = async () => {
+        let lng = this.state.mapLodgingLong
+        let lat = this.state.mapLodgingLat
+        let zoom = 12
+        const mapName = this.state.mapLodgingName
+
+
+        const map = new mapboxgl.Map({
+            container: this.mapContainer.current,
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [lng, lat],
+            zoom: zoom
+        });
+
+        // const marker = new mapboxgl.Marker({
+        //     color: "#0E6EB8",
+        //     draggable: false
+        // }).setLngLat([lng, lat])
+        //     .setPopup(new mapboxgl.Popup().setHTML("<Message compact verticalAlign='middle' className='map-text'>" + mapName + "</Message>")) // add popup
+        //     .addTo(map);
+        // marker.togglePopup()
+     
+        const query = await "https://api.mapbox.com/optimized-trips/v1/mapbox/driving/" + this.getPoiCoordinates(this.state.pois) + "?access_token=" + process.env.REACT_APP_MAPBOX_API_KEY
+        console.log("fetch: " + query)
+
+        const response = await fetch(query, {
+            method: 'GET'
+          });
+        const data = await response.json()
+
+        console.log(data)
+        console.log(data.waypoints[0].location)
+
+        const poisArr = [...this.state.pois]
+        this.reorderPOIs(poisArr, data.waypoints.slice(1))
+        
+        const routeMarkers = data.waypoints.map((point, i)=>{
+            let stopName = ""
+            if(i===0 ){
+                stopName = "STOP #" + point.waypoint_index + " " + this.state.mapLodgingName
+            }else{
+                stopName = "STOP # " + point.waypoint_index + " " +  poisArr[i-1].address
+            }
+            
+            console.log(i)
+              return new mapboxgl.Marker({
+                color: "#B03060",
+                draggable: false
+            }).setLngLat(point.location)
+                .setPopup(new mapboxgl.Popup().setHTML("<Message compact verticalAlign='middle' className='map-text'>" + stopName + "</Message>")) // add popup
+                .addTo(map);
+          })
+          
+        
+        // routeMarkers.forEach(element => {
+        //     element.togglePopup()
+        // });
+
+
+    }
+
     componentDidMount() {
         this.getPois(this.props.trip)
 
@@ -274,7 +364,7 @@ export default class POIForm extends Component {
                 <Header as='h1'>Points of Interest <Icon name='map signs' /></Header>
                 <Grid container style={{ padding: '2em 0em' }}>
                     <Grid.Row>
-                        <h1>{this.props.trip.name}</h1>
+                        <h1> {this.props.trip.name}</h1>
                     </Grid.Row>
                     <Grid.Row>
                         <Table definition>
@@ -283,7 +373,10 @@ export default class POIForm extends Component {
                                     <Table.HeaderCell />
                                     <Table.HeaderCell>Stop Name</Table.HeaderCell>
                                     <Table.HeaderCell>Address</Table.HeaderCell>
-                                    <Table.HeaderCell></Table.HeaderCell>
+                                    {this.state.optimzedModal && <Table.HeaderCell style={{ color: '#016936' }}>Optimized <Icon name='clipboard check' />
+                                    </Table.HeaderCell>}
+                                    {!this.state.optimzedModal && <Table.HeaderCell> 
+                                    </Table.HeaderCell>}
                                 </Table.Row>
                             </Table.Header>
                             <Table.Body>
@@ -309,6 +402,17 @@ export default class POIForm extends Component {
                                 <Table.Row>
                                     <Table.HeaderCell />
                                     <Table.HeaderCell colSpan='3'>
+                                        {this.state.pois.length>0 &&
+                                        <Button
+                                            floated='right'
+                                            icon
+                                            labelPosition='left'
+                                            positive
+                                            size='small'
+                                            onClick={() => this.optimize()}>
+                                            <Icon name='shipping fast' /> Optimize Trip!
+                                        </Button>}
+                                        {this.state.pois.length <=10 &&
                                         <Button
                                             floated='right'
                                             icon
@@ -317,7 +421,16 @@ export default class POIForm extends Component {
                                             size='small'
                                             onClick={() => this.setNewPOIModal()}>
                                             <Icon name='add circle' /> Add POI
-                                        </Button>
+                                        </Button>}
+                                        {this.state.pois.length ===11 && <Button
+                                            floated='right'
+                                            icon
+                                            labelPosition='left'
+                                            primary
+                                            size='small'
+                                            disabled>
+                                            <Icon name='add circle' /> Max POI Reached
+                                        </Button>}
                                     </Table.HeaderCell>
                                 </Table.Row>
                             </Table.Footer>
@@ -424,7 +537,7 @@ export default class POIForm extends Component {
 
 
                 </Grid>
-                    <div ref={this.mapContainer} className="map" />
+                <div ref={this.mapContainer} className="map-poi" />
             </div >
         );
     }

@@ -149,6 +149,7 @@ export default class NewTrip extends Component {
         }).then(data => {
             this.props.addTrips(data.data)
             this.props.setNewTripItem()
+            this.props.showMap(data.data)
             this.setState({
                 name: "",
                 origin: "",

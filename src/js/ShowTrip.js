@@ -141,8 +141,6 @@ export default class ShowTrip extends Component {
     }
 
     showMap = (trip, clear) => {
-        console.log(trip)
-        console.log(this.state.mapClass)
         let lng = trip.lodging.lodging_long
         let lat = trip.lodging.lodging_lat
         let zoom = 15
@@ -162,7 +160,6 @@ export default class ShowTrip extends Component {
             .setPopup(new mapboxgl.Popup().setHTML("<Message compact verticalAlign='middle' className='map-text'>" + mapName + "</Message>")) // add popup
             .addTo(map);
         marker.togglePopup()
-        console.log(clear)
         if(this.props.poiModalOpen){
             map.remove()
         }

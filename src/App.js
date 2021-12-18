@@ -1,6 +1,6 @@
 import './App.css';
 import React, { useState } from 'react';
-import { Button, Menu, Dropdown, Image, Segment, List, Grid, Header, Divider, Container, Icon } from 'semantic-ui-react'
+import { Menu, Dropdown, Image, Segment, List, Divider, Container } from 'semantic-ui-react'
 import UserLogin from './js/UserLogin';
 import routeImg from './imgs/route.png'
 import roadGif from './imgs/IMG_9697.gif'

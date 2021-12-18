@@ -15,9 +15,6 @@ export default class UserLogin extends Component {
 
         }
     }
-    // setShowModal = () =>[
-    //     this.setState({showModalOpen: !this.state.showModalOpen})
-    // ]
 
     getTrips = () => {
         try {
@@ -28,7 +25,6 @@ export default class UserLogin extends Component {
                 this.setState({
                     trips: data.data
                 })
-                console.log("trips: " + this.state.trips)
                 this.props.setTripModalOpen(true)
             })
         }
@@ -40,7 +36,6 @@ export default class UserLogin extends Component {
     }
 
     addTrips = (newTrip) => {
-        console.log("newtrip: " + newTrip)
         const copyTrips = [...this.state.trips]
         copyTrips.push(newTrip)
         this.setState({
@@ -57,25 +52,6 @@ export default class UserLogin extends Component {
             userFormType: type
         })
     }
-
-    // setUser = (user) => {
-    //     this.setState({
-    //         userLoggedIn: true,
-    //         username: user.username,
-    //         userId: user.id,
-    //         email: user.email
-    //     })
-    //     this.getTrips()
-    // }
-    // clearUser = () => {
-    //     this.setState({
-    //         userLoggedIn: false,
-    //         userFormType: "",
-    //         username: "",
-    //         userId: "",
-    //         email: ""
-    //     })
-    // }
 
     handleChange = (event) => {
         this.setState({

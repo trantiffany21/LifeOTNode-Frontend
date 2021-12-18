@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Table, Form, Input, Button, Popup, Modal, Grid, Icon, Header, Segment, Message } from 'semantic-ui-react'
+import { Table, Form, Input, Button, Popup, Modal, Grid, Icon, Header } from 'semantic-ui-react'
 import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
 mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_API_KEY
 
@@ -36,11 +36,9 @@ export default class POIForm extends Component {
                 this.setState({
                     pois: data.data
                 })
-                console.log(this.state.pois[0])
             })
     }
     addPOI = (newPOI) => {
-        console.log("newPOI: " + newPOI)
         const copyPOIs = [...this.state.pois]
         copyPOIs.push(newPOI)
         this.setState({
@@ -183,11 +181,9 @@ export default class POIForm extends Component {
         if (place.target.value !== "") {
             let searchWord = place.target.value.replace(/\s/g, '%20')
             let fetchUrl = "https://api.mapbox.com/geocoding/v5/mapbox.places/" + searchWord + ".json?types=place&access_token=" + this.state.apiKey
-            console.log(fetchUrl)
             try {
                 const response = await fetch(fetchUrl)
                 const data = await response.json()
-                console.log(data.features)
                 let features = data.features
                 const arrPlaces = []
                 features.map((name, i) => {
@@ -196,7 +192,6 @@ export default class POIForm extends Component {
                 this.setState({
                     suggestionList: arrPlaces
                 })
-                console.log(this.state.suggestionList)
 
             } catch (err) {
                 console.log('Error => ', err)
@@ -212,11 +207,9 @@ export default class POIForm extends Component {
         if (place.target.value !== "") {
             let searchWord = place.target.value.replace(/\s/g, '%20')
             let fetchUrl = "https://api.mapbox.com/geocoding/v5/mapbox.places/" + searchWord + ".json?types=poi%2Caddress&access_token=" + this.state.apiKey
-            console.log(fetchUrl)
             try {
                 const response = await fetch(fetchUrl)
                 const data = await response.json()
-                console.log(data.features)
                 let features = data.features
                 const arrPlaces = []
                 features.map((name, i) => {
@@ -231,7 +224,6 @@ export default class POIForm extends Component {
                     suggestionList: arrPlaces,
                     poiSuggestionModal: true
                 })
-                console.log(this.state.suggestionList)
 
             } catch (err) {
                 console.log('Error => ', err)
@@ -287,7 +279,6 @@ export default class POIForm extends Component {
         })
         orderedPOIs.sort((a, b) => (a.waypoint > b.waypoint) ? 1 : -1)
         this.setState({pois: orderedPOIs, optimzedModal: true})
-        console.log(this.state.pois)
     }
 
     optimize = async () => {
@@ -303,25 +294,13 @@ export default class POIForm extends Component {
             center: [lng, lat],
             zoom: zoom
         });
-
-        // const marker = new mapboxgl.Marker({
-        //     color: "#0E6EB8",
-        //     draggable: false
-        // }).setLngLat([lng, lat])
-        //     .setPopup(new mapboxgl.Popup().setHTML("<Message compact verticalAlign='middle' className='map-text'>" + mapName + "</Message>")) // add popup
-        //     .addTo(map);
-        // marker.togglePopup()
      
         const query = await "https://api.mapbox.com/optimized-trips/v1/mapbox/driving/" + this.getPoiCoordinates(this.state.pois) + "?access_token=" + process.env.REACT_APP_MAPBOX_API_KEY
-        console.log("fetch: " + query)
 
         const response = await fetch(query, {
             method: 'GET'
           });
         const data = await response.json()
-
-        console.log(data)
-        console.log(data.waypoints[0].location)
 
         const poisArr = [...this.state.pois]
         this.reorderPOIs(poisArr, data.waypoints.slice(1))
@@ -334,7 +313,6 @@ export default class POIForm extends Component {
                 stopName = "STOP # " + point.waypoint_index + " " +  poisArr[i-1].address
             }
             
-            console.log(i)
               return new mapboxgl.Marker({
                 color: "#B03060",
                 draggable: false
@@ -343,12 +321,6 @@ export default class POIForm extends Component {
                 .addTo(map);
           })
           
-        
-        // routeMarkers.forEach(element => {
-        //     element.togglePopup()
-        // });
-
-
     }
 
     componentDidMount() {

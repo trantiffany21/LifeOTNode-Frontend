@@ -20,11 +20,9 @@ export default class NewTrip extends Component {
         if (place.target.value !== "") {
             let searchWord = place.target.value.replace(/\s/g, '%20')
             let fetchUrl = "https://api.mapbox.com/geocoding/v5/mapbox.places/" + searchWord + ".json?types=place&access_token=" + this.state.apiKey
-            console.log(fetchUrl)
             try {
                 const response = await fetch(fetchUrl)
                 const data = await response.json()
-                console.log(data.features)
                 let features = data.features
                 const arrPlaces = []
                 features.map((name, i) => {
@@ -33,7 +31,6 @@ export default class NewTrip extends Component {
                 this.setState({
                     suggestionList: arrPlaces
                 })
-                console.log(this.state.suggestionList)
 
             } catch (err) {
                 console.log('Error => ', err)
@@ -49,11 +46,9 @@ export default class NewTrip extends Component {
         if (place.target.value !== "") {
             let searchWord = place.target.value.replace(/\s/g, '%20')
             let fetchUrl = "https://api.mapbox.com/geocoding/v5/mapbox.places/" + searchWord + ".json?types=poi%2Caddress&access_token=" + this.state.apiKey
-            console.log(fetchUrl)
             try {
                 const response = await fetch(fetchUrl)
                 const data = await response.json()
-                console.log(data.features)
                 let features = data.features
                 const arrPlaces = []
                 features.map((name, i) => {
@@ -67,7 +62,6 @@ export default class NewTrip extends Component {
                 this.setState({
                     suggestionList: arrPlaces
                 })
-                console.log(this.state.suggestionList)
 
             } catch (err) {
                 console.log('Error => ', err)
@@ -120,13 +114,8 @@ export default class NewTrip extends Component {
             })
 
         }
-        console.log(this.state.suggestionModal)
     }
     handleSubmit = (event) => {
-        console.log(this.state.lodgingName)
-        console.log(this.state.lodgingAddress)
-        console.log(this.state.lodgingLat)
-        console.log(this.state.lodgingLon)
         event.preventDefault()
         fetch(this.props.baseURL + 'trips/', {
             method: 'POST',
